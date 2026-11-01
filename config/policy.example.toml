@@ -1,0 +1,21 @@
+# AgentGuard policy (testnet demo). Amounts in NEAR.
+[limits]
+per_tx_max_near = 0.5          # above this -> human approval
+daily_max_near = 2.0           # rolling 24h spend cap -> human approval
+hard_deny_near = 5.0           # single tx above this is always denied
+max_tx_per_minute = 5          # rate limit -> deny
+
+[recipients]
+# Plain NEAR transfers only to these accounts
+allowlist = ["api-vendor.testnet", "compute-market.testnet"]
+
+[contracts]
+# receiver_id -> allowed methods ("*" = any method not in blocked_methods)
+"usdc.fakes.testnet" = ["ft_transfer"]
+"market.agentguard-demo.testnet" = ["buy_credits", "get_price"]
+
+[blocked]
+# Method name patterns that are never allowed (approval/drain primitives)
+methods = ["*approve*", "storage_withdraw", "ft_transfer_call", "nft_transfer*", "add_key", "delete_key", "set_owner*", "upgrade*", "withdraw_all*"]
+# Actions an agent key must never sign
+actions = ["AddKey", "DeleteKey", "DeployContract", "DeleteAccount", "Stake"]

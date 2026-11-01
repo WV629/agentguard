@@ -1,0 +1,14 @@
+# secrets — never commit
+.env
+*.key
+*wallet*.json
+credentials/
+.near-credentials/
+submission*.json
+# python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+*.egg-info/
+data/*.db
