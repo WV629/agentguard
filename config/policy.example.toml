@@ -7,12 +7,12 @@ max_tx_per_minute = 5          # rate limit -> deny
 
 [recipients]
 # Plain NEAR transfers only to these accounts
-allowlist = ["api-vendor.testnet", "compute-market.testnet"]
+allowlist = ["agentguard-vendor.testnet"]
 
 [contracts]
 # receiver_id -> allowed methods ("*" = any method not in blocked_methods)
 "usdc.fakes.testnet" = ["ft_transfer"]
-"market.agentguard-demo.testnet" = ["buy_credits", "get_price"]
+"agentguard-vendor.testnet" = ["buy_credits", "get_price"]
 
 [blocked]
 # Method name patterns that are never allowed (approval/drain primitives)

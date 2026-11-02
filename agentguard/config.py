@@ -5,6 +5,7 @@ they are never read from or written to the repository.
 """
 from __future__ import annotations
 
+import json
 import os
 from dataclasses import dataclass
 
@@ -36,12 +37,27 @@ class Settings:
     network: str
     rpc_url: str
     agent_account_id: str | None
-    agent_private_key: str | None  # function-call key only
+    agent_private_key: str | None  # function-call key only (the agent's own process)
+    gateway_private_key: str | None  # key the gateway signs with; never given to the agent
     policy_path: str
+    audit_log: str
+    approvals_path: str
 
     @property
     def explorer_tx(self) -> str:
         return NETWORKS[self.network]["explorer_tx"]
+
+
+def _key_from(env_key: str, env_file: str) -> str | None:
+    """A key comes from an env var, or from a JSON key file outside the repo
+    (near-cli style: {"account_id", "public_key", "private_key"})."""
+    if os.environ.get(env_key):
+        return os.environ[env_key]
+    path = os.path.expanduser(os.environ.get(env_file, ""))
+    if path and os.path.exists(path):
+        with open(path, encoding="utf-8") as fh:
+            return json.load(fh)["private_key"]
+    return None
 
 
 def load_settings() -> Settings:
@@ -53,6 +69,9 @@ def load_settings() -> Settings:
         network=network,
         rpc_url=os.environ.get("NEAR_RPC_URL", NETWORKS[network]["rpc_url"]),
         agent_account_id=os.environ.get("AGENT_ACCOUNT_ID"),
-        agent_private_key=os.environ.get("AGENT_PRIVATE_KEY"),
+        agent_private_key=_key_from("AGENT_PRIVATE_KEY", "AGENT_KEY_FILE"),
+        gateway_private_key=_key_from("GATEWAY_PRIVATE_KEY", "GATEWAY_KEY_FILE"),
         policy_path=os.environ.get("AGENTGUARD_POLICY", "config/policy.example.toml"),
+        audit_log=os.environ.get("AGENTGUARD_AUDIT_LOG", "data/audit.jsonl"),
+        approvals_path=os.environ.get("AGENTGUARD_APPROVALS", "data/approvals.jsonl"),
     )
