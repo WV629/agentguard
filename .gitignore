@@ -13,3 +13,4 @@ __pycache__/
 *.egg-info/
 data/*.db
 data/*.jsonl
+.keys/
