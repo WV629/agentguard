@@ -140,6 +140,10 @@ def main(argv: list[str]) -> int:
             t = rec["tx"]
             amt = sum(int(a["deposit_yocto"]) for a in t["actions"]) / YOCTO
             print(f"{rid}  {t['signer_id']} -> {t['receiver_id']}  {amt:g} NEAR  {t.get('intent', '')}  ({'; '.join(rec['reasons'])})")
+            from .explainer import explain
+            from .panel import rec_to_tx
+            from .policy import Decision, Verdict
+            print(f"{'':14}explain: {explain(rec_to_tx(rec), Decision(Verdict.REQUIRE_APPROVAL, rec['reasons']))}")
     elif cmd == "approve":
         show(f"approval {argv[2]}", build_gateway(s).approve(argv[2]), s)
     elif cmd == "reject":

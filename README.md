@@ -98,3 +98,5 @@ tests/                 policy + gateway unit tests
 ## License
 
 MIT
+
+Approval panel: `python -m agentguard.panel` → http://127.0.0.1:8808 (pending queue with plain-language explanation, Approve/Reject, audit log).
