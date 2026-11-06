@@ -26,7 +26,7 @@ Two layers:
 
 Every request is written to an append-only JSONL audit log (`data/audit.jsonl`). `REQUIRE_APPROVAL` requests wait in a human approval queue (`approvals` / `approve <id>` / `reject <id>`); an approval lifts soft limits only and can never override a `DENY`.
 
-Planned (in progress): LLM explainer that summarises each tx in plain language, a FastAPI approval panel, and an end-to-end testnet demo (agent pays for an API → allowed; prompt-injected agent tries to drain → blocked and logged).
+Includes a rule-based plain-language explainer, a FastAPI approval panel, and an end-to-end testnet demo (agent pays for an API → allowed; prompt-injected agent tries to drain → blocked and logged).
 
 ## Try it (judges: do X → see Y)
 
