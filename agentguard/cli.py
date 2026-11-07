@@ -15,6 +15,8 @@
 """
 from __future__ import annotations
 
+import json
+import os
 import sys
 
 from .audit import ApprovalQueue, AuditLog
@@ -104,6 +106,22 @@ def setup_testnet(prefix: str = "") -> None:
     print(f"keys saved in .keys/ (gitignored). Use GATEWAY_KEY_FILE=.keys/{prefix}-demo.testnet.json")
 
 
+def fc_demo(s, key_file: str) -> None:
+    """Sign with the agent's restricted Function-Call key: the NEAR protocol itself rejects
+    transfers and calls outside the whitelist (second line of defence behind the policy engine)."""
+    from .signer import sign_and_send
+    k = json.load(open(key_file))
+    for label, tx in [
+        ("FC key: transfer 0.01 NEAR to attacker", transfer(ATTACKER, 0.01)),
+        ("FC key: call ft_approve on another contract", TxRequest(AGENT, "usdc.fakes.testnet",
+            [Action("FunctionCall", method="ft_approve", args={"spender": ATTACKER})])),
+    ]:
+        try:
+            print(f"[{label}] UNEXPECTEDLY SENT {sign_and_send(s.rpc_url, k['private_key'], tx)}")
+        except Exception as e:  # protocol rejection expected
+            print(f"[{label}] rejected by NEAR protocol: {str(e)[:160]}")
+
+
 def main(argv: list[str]) -> int:
     s = load_settings()
     cmd = argv[1] if len(argv) > 1 else "demo"
@@ -133,6 +151,8 @@ def main(argv: list[str]) -> int:
     elif cmd == "pay":
         t = transfer(argv[2], float(argv[3]), " ".join(argv[4:]))
         show(f"pay {argv[2]} {argv[3]} NEAR", build_gateway(s).submit(t), s, t)
+    elif cmd == "fc-demo":
+        fc_demo(s, argv[2] if len(argv) > 2 else os.environ.get("FC_KEY_FILE", ""))
     elif cmd == "setup-testnet":
         setup_testnet(argv[2] if len(argv) > 2 else "")
     elif cmd == "approvals":

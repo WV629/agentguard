@@ -100,3 +100,8 @@ tests/                 policy + gateway unit tests
 MIT
 
 Approval panel: `python -m agentguard.panel` → http://127.0.0.1:8808 (pending queue with plain-language explanation, Approve/Reject, audit log).
+
+## Demo: protocol-level defence (Function-Call key)
+Run `python -m agentguard.cli fc-demo <agent-fc-key.json>` (key created by `provision-key`). Expected: a transfer
+is rejected with `RequiresFullAccess`, and a call to a non-whitelisted contract with `ReceiverMismatch`, i.e. even
+if the gateway were bypassed, NEAR itself refuses.
