@@ -73,3 +73,10 @@ def test_rate_limit():
         e.record_signed(tx)
     d = e.evaluate(transfer("agentguard-vendor.testnet", 0.01))
     assert d.verdict is Verdict.DENY and "rate limit" in d.reasons[0]
+
+
+def test_policy_prefix_rewrites_demo_accounts():
+    p = Policy.from_toml("config/policy.example.toml", "ag1234")
+    assert "ag1234-vendor.testnet" in p.recipient_allowlist
+    assert "ag1234-vendor.testnet" in p.contract_methods
+    assert "usdc.fakes.testnet" in p.contract_methods

@@ -33,7 +33,7 @@ Includes a rule-based plain-language explainer, a FastAPI approval panel, and an
 ```bash
 git clone <this repo> && cd agentguard
 python -m pip install -r requirements.txt pytest
-python -m pytest -q                 # → 12 passed
+python -m pytest -q                 # → 15 passed
 python -m agentguard.cli demo       # → ALLOW / DENY / REQUIRE_APPROVAL for 6 scripted agent requests
 python -m agentguard.cli check-rpc  # → "testnet block <N> via https://rpc.testnet.near.org"
 python -m agentguard.cli keys agentguard-demo.testnet   # → 1 FULL ACCESS (held by the gateway) + 1 function-call key → agentguard-vendor.testnet (buy_credits, get_price; gas allowance 0.25 NEAR)
@@ -50,7 +50,13 @@ python -m agentguard.cli e2e
 # balance change agentguard-attacker.testnet: +0.0000 NEAR
 python -m agentguard.cli approve <id>   # → human approves, tx signed and sent
 python -m agentguard.cli audit          # → every request with verdict, reasons, tx hash
+python -m agentguard.cli fc-demo <agent-fc-key.json>
+# → transfer with the agent's Function-Call key: rejected by NEAR (RequiresFullAccess)
+# → call to a non-whitelisted contract: rejected by NEAR (ReceiverMismatch)
+python -m agentguard.panel              # → approval panel at http://127.0.0.1:8808
 ```
+
+No testnet account yet? `python -m agentguard.cli setup-testnet` creates four funded testnet accounts via the NEAR helper (keys go to the git-ignored `.keys/`), then follow the printed `GATEWAY_KEY_FILE` hint and run `e2e`.
 
 Example on-chain transactions from the demo accounts: [vendor payment](https://testnet.nearblocks.io/txns/D3BtnjopH39Ak1Rsh46PTHDRFiEc2V2K9pvzDx48Z7or), [approved large payment](https://testnet.nearblocks.io/txns/5XQAm4MZT8JipmGUJ1eZ61c1M6zgtt9tWvuDpuJvMeJB), [function-call key provisioning](https://testnet.nearblocks.io/txns/77nSyWUJhCSbG6fUz9PFXAoKi9J6FsGxQ6wBnbtw9SAX).
 
@@ -78,7 +84,9 @@ agentguard/config.py   testnet settings from env
 agentguard/gateway.py  the only signer: evaluate → sign / queue / deny, audit everything
 agentguard/signer.py   py-near signing (Transfer + FunctionCall only), function-call key provisioning
 agentguard/audit.py    JSONL audit log + human approval queue
-agentguard/cli.py      demo, live e2e, approvals, audit, key provisioning
+agentguard/explainer.py rule-based plain-language tx summary
+agentguard/panel.py    FastAPI approval panel (pending queue, approve/reject, audit)
+agentguard/cli.py      demo, live e2e, approvals, audit, key provisioning, fc-demo, setup-testnet
 tests/                 policy + gateway unit tests
 ```
 

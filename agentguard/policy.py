@@ -77,7 +77,10 @@ class Policy:
     blocked_actions: set[str]
 
     @classmethod
-    def from_toml(cls, path: str) -> "Policy":
+    def from_toml(cls, path: str, prefix: str = "agentguard") -> "Policy":
+        """Load a TOML policy; account ids starting with "agentguard-" follow `prefix` (setup-testnet accounts)."""
+        def rn(a: str) -> str:
+            return prefix + a[len("agentguard"):] if a.startswith("agentguard-") else a
         with open(path, "rb") as fh:
             raw = tomllib.load(fh)
         lim = raw.get("limits", {})
@@ -86,8 +89,8 @@ class Policy:
             daily_max_yocto=near_to_yocto(lim.get("daily_max_near", 2.0)),
             hard_deny_yocto=near_to_yocto(lim.get("hard_deny_near", 5.0)),
             max_tx_per_minute=int(lim.get("max_tx_per_minute", 5)),
-            recipient_allowlist=set(raw.get("recipients", {}).get("allowlist", [])),
-            contract_methods={k: list(v) for k, v in raw.get("contracts", {}).items()},
+            recipient_allowlist={rn(a) for a in raw.get("recipients", {}).get("allowlist", [])},
+            contract_methods={rn(k): list(v) for k, v in raw.get("contracts", {}).items()},
             blocked_methods=list(raw.get("blocked", {}).get("methods", [])),
             blocked_actions=set(raw.get("blocked", {}).get("actions", [])),
         )

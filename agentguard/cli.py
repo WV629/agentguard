@@ -25,9 +25,13 @@ from .gateway import Gateway
 from .policy import YOCTO, Action, Policy, PolicyEngine, TxRequest, near_to_yocto
 from .rpc import NearRpc, describe_key
 
-AGENT = "agentguard-demo.testnet"
-VENDOR = "agentguard-vendor.testnet"
-ATTACKER = "agentguard-attacker.testnet"
+from .config import _load_dotenv
+
+_load_dotenv()  # setup-testnet writes AGENTGUARD_PREFIX / GATEWAY_KEY_FILE to .env
+PREFIX = os.environ.get("AGENTGUARD_PREFIX", "agentguard")
+AGENT = f"{PREFIX}-demo.testnet"
+VENDOR = f"{PREFIX}-vendor.testnet"
+ATTACKER = f"{PREFIX}-attacker.testnet"
 
 
 def demo(policy_path: str) -> None:
@@ -53,7 +57,7 @@ def build_gateway(s) -> Gateway:
         raise SystemExit("set GATEWAY_PRIVATE_KEY or GATEWAY_KEY_FILE (see .env.example)")
     from .signer import sign_and_send
 
-    engine = PolicyEngine(Policy.from_toml(s.policy_path))
+    engine = PolicyEngine(Policy.from_toml(s.policy_path, PREFIX))
     audit = AuditLog(s.audit_log)
     # Rebuild the rolling 24h spend window from the audit log so limits survive restarts.
     import calendar, time
@@ -103,7 +107,12 @@ def setup_testnet(prefix: str = "") -> None:
             fd = os.open(f".keys/{acct}.json", os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600)
             with os.fdopen(fd, "w") as f:
                 json.dump({"account_id": acct, "private_key": priv, "public_key": pub}, f)
-    print(f"keys saved in .keys/ (gitignored). Use GATEWAY_KEY_FILE=.keys/{prefix}-demo.testnet.json")
+    if not os.path.exists(".env"):
+        with open(".env", "w", encoding="utf-8") as f:
+            f.write(f"NEAR_NETWORK=testnet\nAGENTGUARD_PREFIX={prefix}\nGATEWAY_KEY_FILE=.keys/{prefix}-demo.testnet.json\n")
+        print(f"keys saved in .keys/ and settings written to .env (both git-ignored). Now run: python -m agentguard.cli e2e")
+    else:
+        print(f"keys saved in .keys/ (gitignored). Set AGENTGUARD_PREFIX={prefix} and GATEWAY_KEY_FILE=.keys/{prefix}-demo.testnet.json")
 
 
 def fc_demo(s, key_file: str) -> None:
