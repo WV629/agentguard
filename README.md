@@ -97,7 +97,16 @@ tests/                 policy + gateway unit tests
 - Signing/sending: [py-near](https://pypi.org/project/py-near/).
 - Demo accounts (testnet): `agentguard-demo` (agent wallet), `agentguard-vendor` (API vendor), `agentguard-attacker`, `agentguard-owner`.
 
+## How to verify the demo
+
+1. `python -m agentguard.cli setup-testnet` (creates funded testnet accounts, writes `.env`).
+2. `python -m agentguard.cli e2e` → expect ALLOW (vendor payment), DENY (3 NEAR drain), DENY (`ft_approve`), REQUIRE_APPROVAL (1.5 NEAR queued).
+3. `python -m agentguard.cli approvals` then `approve <id>` → queued tx is signed and sent.
+4. `python -m agentguard.cli audit` → every decision is logged; attacker balance stays +0.
+
 ## Disclosure
+
+- The demo video shown in the X post is a terminal replay of a real live testnet run (generator not part of the repo).
 
 - New project, all code written during NEAR HACKATHON (from 2026-11-01).
 - Libraries: py-near, httpx, PyNaCl, base58, pytest. Parts of the code were written with AI assistance.
