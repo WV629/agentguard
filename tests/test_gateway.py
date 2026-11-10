@@ -50,3 +50,20 @@ def test_approval_cannot_override_a_deny(tmp_path):
     g.engine.policy.recipient_allowlist.clear()  # policy tightened while tx was waiting
     res = g.approve(out.approval_id)
     assert res.decision.verdict is Verdict.DENY and not sent
+
+
+def test_rejected_is_never_sent(tmp_path):
+    sent = []
+    g = gw(tmp_path, sent)
+    out = g.submit(t("agentguard-vendor.testnet", 1.5))
+    g.reject(out.approval_id)
+    assert not sent and not g.approvals.pending()
+
+
+def test_audit_log_is_append_only_and_ordered(tmp_path):
+    sent = []
+    g = gw(tmp_path, sent)
+    g.submit(t("agentguard-vendor.testnet", 0.01))
+    g.submit(t("agentguard-attacker.testnet", 3))
+    ev = [r["event"] for r in g.audit.read()]
+    assert ev == ["signed", "denied"]
