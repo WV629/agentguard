@@ -2,7 +2,7 @@
 
 **A policy gateway between an AI agent and its NEAR wallet.** Give an agent money without giving it the keys to everything.
 
-> Status: work in progress for NEAR HACKATHON (2026-11-01 – 2026-11-15). Testnet only. Tracks: `security`, `agents`.
+> Built for NEAR HACKATHON (2026-11-01 – 2026-11-15). Testnet only. Tracks: `security`, `agents`.
 
 ## Problem
 
@@ -33,7 +33,7 @@ Includes a rule-based plain-language explainer, a FastAPI approval panel, and an
 ```bash
 git clone <this repo> && cd agentguard
 python -m pip install -r requirements.txt pytest
-python -m pytest -q                 # → 15 passed
+python -m pytest -q                 # → 17 passed
 python -m agentguard.cli demo       # → ALLOW / DENY / REQUIRE_APPROVAL for 6 scripted agent requests
 python -m agentguard.cli check-rpc  # → "testnet block <N> via https://rpc.testnet.near.org"
 python -m agentguard.cli keys agentguard-demo.testnet   # → 1 FULL ACCESS (held by the gateway) + 1 function-call key → agentguard-vendor.testnet (buy_credits, get_price; gas allowance 0.25 NEAR)
